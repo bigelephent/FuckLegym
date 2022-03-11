@@ -24,6 +24,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -39,6 +40,27 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import fucklegym.top.entropy.*;
+class LoginCheck extends Thread{
+    String username;
+    String password;
+    Handler handler;
+    public LoginCheck(String username, String password, Handler handler){
+        this.username = username;
+        this.password = password;
+        this.handler = handler;
+    }
+    @Override
+    public void run() {
+        try {
+            User user = new User(username, password);
+            user.login();
+            handler.sendEmptyMessage(MainActivity.LOGIN_SUCCESS);
+        }catch (IOException e){
+            e.printStackTrace();
+            handler.sendEmptyMessage(MainActivity.LOGIN_FAIL);
+        }
+    }
+}
 class Jump extends Thread{
     private Activity cont;
     public Jump(Activity con){
@@ -152,7 +174,8 @@ class CheckUpdateThread extends Thread{
     }
 }
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-
+    public static final int LOGIN_SUCCESS = 0;
+    public static final int LOGIN_FAIL = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -210,20 +233,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        if(view.getId()==R.id.button_freeRun){
-            jumpFreeRun();
-        }else if (view.getId()==R.id.button_signup){
-            jumpSignUp();
-        }else if (view.getId()==R.id.button_course_sign){
-            jumpCourseSignUp();
-        }
+        Handler handler = new Handler(){
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                switch (msg.what){
+                    case LOGIN_SUCCESS:
+                        Toast.makeText(MainActivity.this, "登陆成功！", Toast.LENGTH_SHORT).show();
+                        if(view.getId()==R.id.button_freeRun){
+                            jumpFreeRun();
+                        }else if (view.getId()==R.id.button_signup){
+                            jumpSignUp();
+                        }else if (view.getId()==R.id.button_course_sign){
+                            jumpCourseSignUp();
+                        }
+                        break;
+                    case LOGIN_FAIL:
+                        android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MainActivity.this)
+                                .setTitle("登陆失败")
+                                .setMessage("乐健账户登陆检查失败，请重新检查您的乐健账号和密码！")
+                                .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                    }
+                                })
+                                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                    }
+                                })
+                                .create();
+                        alertDialog.show();
+                        break;
+                }
+            }
+        };
+        EditText username = (EditText)findViewById(R.id.editText_username);
+        EditText password = (EditText)findViewById(R.id.editText_password);
+        String user = username.getText().toString();
+        String pass = password.getText().toString();
+        new LoginCheck(user,pass, handler).start();
     }
     private void jumpFreeRun(){
         Jump jmp = new Jump(this);
         jmp.start();
-        Button but = (Button)findViewById(R.id.button_freeRun);
-//        but.setText("Waiting for jumping pages");
-//        but.setEnabled(false);
     }
     private void jumpSignUp(){
         SignJump jmp = new SignJump(this);

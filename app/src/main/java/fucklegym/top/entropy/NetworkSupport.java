@@ -223,7 +223,7 @@ public class NetworkSupport {
         content.put("name", "");
         content.put("campus", "");
         content.put("page", 1);
-        content.put("size", 30);
+        content.put("size", 50);
         content.put("state", "");
         content.put("topicId", "");
         content.put("week", "");

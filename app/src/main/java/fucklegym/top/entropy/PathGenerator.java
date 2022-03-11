@@ -64,14 +64,10 @@ public class PathGenerator {
         base_lon = currentMap.get("base")[1];
     }
 
-//    public static ArrayList<Pair<Double,Double>> genPointsInUESTC(int count){
-//        ArrayList<Pair<Double,Double>> points = new ArrayList<>();
-//        Random rad = new Random(System.currentTimeMillis());
-//        for(int i = 1;i<=count;i++){
-//            points.add(new Pair(base_lat + rad.nextInt(10000) / 1000000.0/2.0,base_lon + rad.nextInt(10000) / 1000000.0/2.0));
-//        }
-//        return points;
-//    }
+    public static int getMin(double[] latitude, double[] longitude){
+        return latitude.length <= longitude.length ? latitude.length : longitude.length;
+    }
+
     public static ArrayList<Pair<Double,Double>> genRegularRoutine(String map, double totalMile){
         int cycleMeter = 400;//操场一圈的长度
         int totalMeter = (int)(totalMile * 1000);
@@ -80,18 +76,24 @@ public class PathGenerator {
         ArrayList<Pair<Double,Double>> points = new ArrayList<>();
         Random rad = new Random(System.currentTimeMillis());
         for(int j = 0;j <= totalMeter/cycleMeter;j ++){
+            Log.d("pathG", "genRegularRoutine: length:" + latitude.length);
+            Log.d("pathG", "genRegularRoutine: j:" + j);
             if(totalMeter/cycleMeter - j - 1 >= 0) {
-                for (int i = 0; i < latitude.length; i++) {
+                for (int i = 0; i < getMin(latitude, longitude); i++) {
+                    Log.d("pathG", "genRegularRoutine: i:" + i);
                     points.add(new Pair(latitude[i] + rad.nextInt(offset) * 1e-5, longitude[i] + rad.nextInt(offset) * 1e-5));
                 }
             }else {
                 int lastMeter = totalMeter - j * cycleMeter;
                 double rate = ((double) lastMeter)/((double)cycleMeter);
                 Log.d("run_rate", "genRegularRoutine: " + rate);
-                for (int i = 0; i < latitude.length*rate; i++) {
+                for (int i = 0; i < getMin(latitude, longitude)*rate; i++) {
                     points.add(new Pair(latitude[i] + rad.nextInt(offset) * 1e-5, longitude[i] + rad.nextInt(offset) * 1e-5));
                 }
             }
+        }
+        if(totalMeter < 0){
+            points.add(new Pair<>(latitude[0], longitude[0]));
         }
 
         return points;
