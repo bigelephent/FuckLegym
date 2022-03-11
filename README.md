@@ -49,16 +49,13 @@
 
 ## 自主fork法（推荐此方法）
 
-自己fork一份到自己仓库，然后到 **app/src/main/java/fucklegym/top/entropy/PathGenerator** 类中增加坐标。
-
-格式为：
+自己fork一份到自己仓库，然后到 **docs/maps.json** 文件中严格按照 **json** 格式在末尾添加：
 
 ```java
-put("xx大学（xx校区）", new HashMap<String, double[]>(){{
-                put("latitude", new double[]{纬度1, 纬度2, ....., 纬度N});
-                put("lontitude", new double[]{经度1, 经度2, ....., 经度N});
-                put("base", new double[]{起点纬度, 起点经度});
-            }});
+"xx大学（xx校区）": {
+    "latitude": [纬度1, 纬度2, ..., 纬度N],
+    "longitude": [经度1, 经度2, ..., 经度N]
+  }
 ```
 
-增添后自己本地生成 apk 自己用就行，有想法的可以直接 Pull Request。
+添加后向本仓库发起 Pull Request， 待审核后即可。
